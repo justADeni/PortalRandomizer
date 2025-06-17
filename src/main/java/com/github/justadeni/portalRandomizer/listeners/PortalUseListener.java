@@ -8,10 +8,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class PortalUseListener implements Listener {
 
@@ -19,6 +22,8 @@ public class PortalUseListener implements Listener {
     public void onPortalUse(PlayerPortalEvent event) {
         if (event.getCause() != PlayerTeleportEvent.TeleportCause.NETHER_PORTAL)
             return;
+
+        Player player = event.getPlayer();
 
         event.setCancelled(true);
         Thread.ofVirtual().start(() -> {
@@ -34,7 +39,14 @@ public class PortalUseListener implements Listener {
             Destination destination = event.getTo().getWorld().getEnvironment() == World.Environment.NETHER ? Destination.NETHER : Destination.OVERWORLD;
             Result<Location> attempt = Destination.get(updatedLocation, destination);
             if (attempt instanceof Result.Success<Location> success) {
-                event.getPlayer().teleportAsync(success.value());
+                Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 10*20, 127, false, false, false));
+                });
+                player.teleportAsync(success.value()).thenRun(() -> {
+                    Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> {
+                        player.removePotionEffect(PotionEffectType.RESISTANCE);
+                    });
+                });
             } else {
                 Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> {
                     event.getFrom().getBlock().breakNaturally();
