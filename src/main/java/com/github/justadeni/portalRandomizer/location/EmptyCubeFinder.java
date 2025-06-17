@@ -1,13 +1,12 @@
 package com.github.justadeni.portalRandomizer.location;
 
+import com.github.justadeni.portalRandomizer.util.Coordinate;
+import com.github.justadeni.portalRandomizer.util.LocationUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class EmptyCubeFinder {
 
@@ -30,48 +29,30 @@ public class EmptyCubeFinder {
             // Add other materials to ignore here if needed
     ));
 
-    public static SearchAttempt find(Location center, int size, int radius) {
-        World world = center.getWorld();
-        if (world == null || size <= 0 || radius < size / 2) return null;
+    private final List<Coordinate> space;
 
-        int offset = size / 2;
-
-        for (int dx = -radius; dx <= radius; dx++) {
-            for (int dy = -radius; dy <= radius; dy++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    Location cubeCenter = center.clone().add(dx, dy, dz);
-                    Block baseBlock = cubeCenter.getBlock();
-                    boolean isClear = true;
-
-                    // Check if the entire cube is AIR or empty
-                    for (int x = -offset; x < size - offset && isClear; x++) {
-                        for (int y = -offset; y < size - offset && isClear; y++) {
-                            for (int z = -offset; z < size - offset; z++) {
-                                Block b = baseBlock.getRelative(x, y, z);
-                                if (!(b.getType() == Material.AIR || b.isEmpty())) {
-                                    isClear = false;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    // Check below the cube if clear
-                    if (isClear) {
-                        Block below = baseBlock.getRelative(0, -offset - 1, 0);
-                        if (below.isEmpty() || IGNORED_MATERIALS.contains(below.getType())) {
-                            isClear = false;
-                        }
-                    }
-
-                    if (isClear) {
-                        return new SearchAttempt.Success(cubeCenter);
-                    }
+    public EmptyCubeFinder(int side) {
+        int halfside = side/2;
+        space = new ArrayList<>();
+        for (int x = -halfside; x < halfside; x++){
+            for (int y = -halfside; y < halfside; y++) {
+                for (int z = -halfside; z < halfside; z++) {
+                    space.add(new Coordinate(x, y, z));
                 }
             }
         }
+    }
 
-        return new SearchAttempt.Failure();
+    public Result<Location> find(Location center) {
+        outer: for (int i = -32; i < 32; i++) {
+            inner: for (Coordinate coordinate : space) {
+                Block applied = coordinate.applyTo(center, i).getBlock();
+                if (!applied.isEmpty() && !IGNORED_MATERIALS.contains(applied.getType()))
+                    continue outer;
+            }
+            return new Result.Success<>(LocationUtil.alter(center, 0, i-2, 0));
+        }
+        return new Result.Failure<>();
     }
 
 }
