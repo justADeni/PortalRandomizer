@@ -4,6 +4,7 @@ import com.github.justadeni.portalRandomizer.PortalRandomizer;
 import com.github.justadeni.portalRandomizer.location.Destination;
 import com.github.justadeni.portalRandomizer.location.Result;
 import com.github.justadeni.portalRandomizer.util.LocationUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -35,7 +36,9 @@ public class PortalUseListener implements Listener {
             if (attempt instanceof Result.Success<Location> success) {
                 event.getPlayer().teleportAsync(success.value());
             } else {
-                PortalRandomizer.getInstance().getLogger().info("Error generating a Nether portal.");
+                Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> {
+                    event.getFrom().getBlock().breakNaturally();
+                });
             }
         });
     }
