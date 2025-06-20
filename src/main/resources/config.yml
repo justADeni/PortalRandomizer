@@ -1,0 +1,7 @@
+# Do not touch
+config-version: "0.3.4"
+
+# Randomly generated keys for
+# linking portals, generated once
+# Do not touch if you don't know what you're doing
+keys: []

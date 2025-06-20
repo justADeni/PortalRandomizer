@@ -1,8 +1,11 @@
 package com.github.justadeni.portalRandomizer.crypto;
 
+import com.github.justadeni.portalRandomizer.PortalRandomizer;
+
 public class Feistel16Bit {
     // Example 8-bit round keys
-    private static final int[] KEYS = {0xA7, 0x4D, 0xF2, 0x1B};
+    private static final int[] KEYS = PortalRandomizer.getInstance().getConfig().getIntegerList("keys")
+            .stream().mapToInt(i->i).toArray();
 
     public static int feistelEncrypt(int input) {
         int x = input ^ 0x8000; // flip sign bit: signed -> unsigned
