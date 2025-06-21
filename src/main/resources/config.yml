@@ -1,5 +1,5 @@
 # Do not touch
-config-version: "0.3.4"
+config-version: ${project.version}
 
 # Randomly generated keys for
 # linking portals, generated once

@@ -2,9 +2,9 @@ package com.github.justadeni.portalRandomizer.crypto;
 
 public class Feistel8Bit {
     // Example 4-bit round keys
-    private static final int[] KEYS = {0xD, 0x7, 0xE}; // values 0–15
+    private final int[] KEYS = {0xD, 0x7, 0xE}; // values 0–15
 
-    public static int feistelEncrypt(int input) {
+    public int encrypt(int input) {
         int left = (input >>> 4) & 0xF;  // upper 4 bits
         int right = input & 0xF;         // lower 4 bits
 
@@ -19,7 +19,7 @@ public class Feistel8Bit {
         return ((left << 4) | right) & 0xFF;
     }
 
-    public static int feistelDecrypt(int input) {
+    public int decrypt(int input) {
         int left = (input >>> 4) & 0xF;
         int right = input & 0xF;
 
@@ -34,7 +34,7 @@ public class Feistel8Bit {
         return ((left << 4) | right) & 0xFF;
     }
 
-    private static int roundFunction(int value, int key) {
+    private int roundFunction(int value, int key) {
         return ((value * 3 + key) & 0xF); // simple 4-bit function
     }
 

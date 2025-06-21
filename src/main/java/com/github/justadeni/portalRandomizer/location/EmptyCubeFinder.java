@@ -8,7 +8,7 @@ import org.bukkit.block.Block;
 
 import java.util.*;
 
-public class EmptyCubeFinder {
+public class EmptyCubeFinder implements LocationFinder {
 
     private static final Set<Material> IGNORED_MATERIALS = new HashSet<>(Arrays.asList(
             Material.SHORT_GRASS,
@@ -43,16 +43,16 @@ public class EmptyCubeFinder {
         }
     }
 
-    public Result<Location> find(Location center) {
+    public Result find(Location center) {
         outer: for (int i = -32; i < 32; i++) {
             inner: for (Coordinate coordinate : space) {
                 Block applied = coordinate.applyTo(center, i).getBlock();
                 if (!applied.isEmpty() && !IGNORED_MATERIALS.contains(applied.getType()))
                     continue outer;
             }
-            return new Result.Success<>(LocationUtil.alter(center, 0, i-2, 0));
+            return new Result.Success(LocationUtil.alter(center, 0, i-2, 0));
         }
-        return new Result.Failure<>();
+        return new Result.Failure();
     }
 
 }

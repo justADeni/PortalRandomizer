@@ -2,6 +2,7 @@ package com.github.justadeni.portalRandomizer.util;
 
 import org.bukkit.Location;
 
+// Allows for packing three 8-bit numbers in one int
 public class Coordinate {
 
     private final int packed;
