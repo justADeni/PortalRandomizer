@@ -35,6 +35,7 @@ public final class PortalRandomizer extends JavaPlugin {
                 keys.add(random.nextInt(256)); // 8-bit keys
             }
             getConfig().set("keys", keys);
+            saveConfig();
         }
     }
 
