@@ -10,6 +10,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.Orientable;
 
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.IntStream;
 
 public class PortalFrameBuilder {
 
@@ -56,21 +58,29 @@ public class PortalFrameBuilder {
         World world = location.getWorld();
         boolean flag = (location.getBlockX() & 1) != 0;
 
-        world.getChunkAtAsync(location).thenRun(() -> {
-            Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> {
-                for (Coordinate coordinate : OBSIDIAN) {
-                    Location frame = flag ? coordinate.applyTo(location) : coordinate.applyAndTranspose(location);
-                    frame.getBlock().setType(Material.OBSIDIAN);
-                }
-                for (Coordinate coordinate : NETHER_PORTAL) {
-                    Location inside = flag ? coordinate.applyTo(location) : coordinate.applyAndTranspose(location);
-                    Block block = inside.getBlock();
-                    block.setType(Material.NETHER_PORTAL);
-                    Orientable blockData = ((Orientable) block.getBlockData());
-                    blockData.setAxis(flag ? Axis.X : Axis.Z);
-                    block.setBlockData(blockData, false);
-                }
-            });
+        int chunkX = location.blockX() >> 4;
+        int chunkZ = location.blockZ() >> 4;
+
+        @SuppressWarnings("unchecked")
+        CompletableFuture<Chunk>[] futures = IntStream.range(-4, 4)
+                .boxed()
+                .flatMap(i -> IntStream.range(-4, 4)
+                .mapToObj(j -> world.getChunkAtAsync(chunkX+i, chunkZ+j)))
+                .toArray(CompletableFuture[]::new);
+
+        CompletableFuture.allOf(futures).thenRun(() -> {
+            for (Coordinate coordinate : OBSIDIAN) {
+                Location frame = flag ? coordinate.applyTo(location) : coordinate.applyAndTranspose(location);
+                frame.getBlock().setType(Material.OBSIDIAN);
+            }
+            for (Coordinate coordinate : NETHER_PORTAL) {
+                Location inside = flag ? coordinate.applyTo(location) : coordinate.applyAndTranspose(location);
+                Block block = inside.getBlock();
+                block.setType(Material.NETHER_PORTAL);
+                Orientable blockData = ((Orientable) block.getBlockData());
+                blockData.setAxis(flag ? Axis.X : Axis.Z);
+                block.setBlockData(blockData, false);
+            }
         });
     }
 
