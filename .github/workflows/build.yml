@@ -1,12 +1,12 @@
-name: Build and Release JAR
+name: Auto Build, Tag, and Release
 
 on:
   push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - main  # Change if your branch is different
 
 jobs:
-  build:
+  build-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,19 +22,27 @@ jobs:
       - name: Build with Maven
         run: mvn -B package
 
-      - name: Get version and artifact name
+      - name: Get project version and artifact name
         id: vars
         run: |
           NAME=$(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "JAR_NAME=${NAME}-${VERSION}.jar" >> $GITHUB_ENV
-          echo "tag_name=v${VERSION}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TAG=${VERSION}" >> $GITHUB_ENV
+
+      - name: Create Git tag
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag ${{ env.TAG }}
+          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }} ${{ env.TAG }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.tag_name }}
-          name: Release ${{ env.tag_name }}
+          tag_name: ${{ env.TAG }}
+          name: Release ${{ env.TAG }}
           files: target/${{ env.JAR_NAME }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
