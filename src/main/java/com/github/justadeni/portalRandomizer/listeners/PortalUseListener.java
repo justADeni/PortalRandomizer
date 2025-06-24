@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class PortalUseListener implements Listener {
@@ -54,7 +55,12 @@ public class PortalUseListener implements Listener {
             } else {// No existing Nether portal found, need to find a suitable place and make it
                 Result spaceSearchAttempt = cubeFinder.find(searchCenter);
                 if (spaceSearchAttempt instanceof Result.Success success) {
-                    PortalFrameBuilder.create(success.location());
+                    try {
+                        // Wait until the portal is made, only then proceed
+                        PortalFrameBuilder.create(success.location()).get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
                     attempt = new Result.Success(success.location());
                 } else {
                     attempt = new Result.Failure();
@@ -63,7 +69,7 @@ public class PortalUseListener implements Listener {
 
             if (attempt instanceof Result.Success success) {
                 PlayerDamageListener.add(player);
-                player.teleportAsync(success.location()).thenRunAsync(() -> PlayerDamageListener.remove(player));
+                player.teleportAsync(success.location().add(0.5,0,0.5)).thenRunAsync(() -> PlayerDamageListener.remove(player));
             } else {
                 Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> event.getFrom().getBlock().breakNaturally());
             }

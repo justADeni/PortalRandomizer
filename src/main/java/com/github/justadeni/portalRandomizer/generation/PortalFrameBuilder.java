@@ -54,7 +54,7 @@ public class PortalFrameBuilder {
             new Coordinate(1,2,0)
     );
 
-    public static void create(Location location) {
+    public static CompletableFuture<Void> create(Location location) {
         World world = location.getWorld();
         boolean flag = (location.getBlockX() & 1) != 0;
 
@@ -62,13 +62,13 @@ public class PortalFrameBuilder {
         int chunkZ = location.blockZ() >> 4;
 
         @SuppressWarnings("unchecked")
-        CompletableFuture<Chunk>[] futures = IntStream.range(-4, 4)
+        CompletableFuture<Chunk>[] futures = IntStream.range(-2, 2)
                 .boxed()
-                .flatMap(i -> IntStream.range(-4, 4)
+                .flatMap(i -> IntStream.range(-2, 2)
                 .mapToObj(j -> world.getChunkAtAsync(chunkX+i, chunkZ+j)))
                 .toArray(CompletableFuture[]::new);
 
-        CompletableFuture.allOf(futures).thenRun(() -> {
+        return CompletableFuture.allOf(futures).thenRun(() -> {
             for (Coordinate coordinate : OBSIDIAN) {
                 Location frame = flag ? coordinate.applyTo(location) : coordinate.applyAndTranspose(location);
                 frame.getBlock().setType(Material.OBSIDIAN);
