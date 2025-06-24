@@ -23,7 +23,7 @@ Portal's Uncertainty Principle disrupts traditional Nether travel by:
 
 ## 🐛 Bug Reporting & Support
 
-If you encounter any bugs or have suggestions, please open an issue on [Insert Issue Tracker Link Here - e.g., GitHub Issues].  Please include:
+If you encounter any bugs or have suggestions, please open an issue on [Github Issues](https://github.com/justADeni/PortalsUncertaintyPrinciple/issues).  Please include:
 
 * A detailed description of the bug.
 * Server logs (if applicable).
