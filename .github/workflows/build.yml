@@ -2,8 +2,13 @@ name: Auto Tag, Build, and Release
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - 'pom.xml'
+      - 'src/**'
+  pull_request:
+    paths:
+      - 'pom.xml'
+      - 'src/**'
 
 jobs:
   all:
