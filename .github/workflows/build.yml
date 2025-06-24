@@ -1,4 +1,4 @@
-name: Auto Build, Tag, and Release
+name: Auto Tag, Build, and Release
 
 on:
   push:
@@ -6,12 +6,22 @@ on:
       - main
 
 jobs:
-  build-release:
+  all:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
+        env:
+          VERSION: $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          NAME: $(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
+
+      - name: Create Tag
+        run: |
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git tag -a "${{ VERSION }}" -m "Release ${{ VERSION }}"
+            git push origin "${{ VERSION }}"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -22,14 +32,11 @@ jobs:
       - name: Build with Maven
         run: mvn -B package
 
-      - name: Create tag and GitHub release
-        run: |
-            VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-            NAME=$(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
-            JAR=target/${NAME}-${VERSION}.jar
-            
-            git config user.name "github-actions"
-            git config user.email "github-actions@users.noreply.github.com"
-            git tag "$VERSION"
-            git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }} "$VERSION"
-            gh release create "$VERSION" "$JAR" --generate-notes --title "Release $VERSION" --fail-on-no-commits
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "target/${{ NAME }}-${{ VERSION }}.jar"
+          artifactErrorsFailBuild: true
+          generateReleaseNotes: true
+          makeLatest: true
+          tag: "${{ VERSION }}"
