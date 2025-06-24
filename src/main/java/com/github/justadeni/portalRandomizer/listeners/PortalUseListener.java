@@ -7,7 +7,6 @@ import com.github.justadeni.portalRandomizer.location.EmptyCubeFinder;
 import com.github.justadeni.portalRandomizer.location.PortalFinder;
 import com.github.justadeni.portalRandomizer.location.Result;
 import com.github.justadeni.portalRandomizer.util.LocationUtil;
-import io.papermc.paper.entity.TeleportFlag;
 import org.bukkit.*;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.Player;
@@ -32,7 +31,7 @@ public class PortalUseListener implements Listener {
         Thread.ofVirtual().start(() -> {
             Location updatedLocation = LocationUtil.copy(event.getFrom());
 
-            // find one corner of portal
+            // Find one corner of portal
             // so that location of entering individual
             // portal blocks within one portal
             // doesn't change destination
@@ -51,7 +50,7 @@ public class PortalUseListener implements Listener {
             // Found existing Nether portal nearby to destination, using it
             if (portalSearchAttempt instanceof Result.Success) {
                 attempt = portalSearchAttempt;
-            } else {// No existing Nether portal found, need to find a suitable place and make it
+            } else { // No existing Nether portal found, need to find a suitable place and make it
                 Result spaceSearchAttempt = cubeFinder.find(searchCenter);
                 if (spaceSearchAttempt instanceof Result.Success success) {
                     try {

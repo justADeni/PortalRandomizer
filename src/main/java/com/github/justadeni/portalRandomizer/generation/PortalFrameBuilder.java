@@ -1,6 +1,5 @@
 package com.github.justadeni.portalRandomizer.generation;
 
-import com.github.justadeni.portalRandomizer.PortalRandomizer;
 import com.github.justadeni.portalRandomizer.util.Coordinate;
 import org.bukkit.*;
 
