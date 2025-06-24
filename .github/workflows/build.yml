@@ -3,7 +3,7 @@ name: Auto Build, Tag, and Release
 on:
   push:
     branches:
-      - main  # Change if your branch is different
+      - main
 
 jobs:
   build-release:
@@ -22,27 +22,14 @@ jobs:
       - name: Build with Maven
         run: mvn -B package
 
-      - name: Get project version and artifact name
-        id: vars
+      - name: Create tag and GitHub release
         run: |
-          NAME=$(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "JAR_NAME=${NAME}-${VERSION}.jar" >> $GITHUB_ENV
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "TAG=${VERSION}" >> $GITHUB_ENV
-
-      - name: Create Git tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git tag ${{ env.TAG }}
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }} ${{ env.TAG }}
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: Release ${{ env.TAG }}
-          files: target/${{ env.JAR_NAME }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+            VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+            NAME=$(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
+            JAR=target/${NAME}-${VERSION}.jar
+            
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git tag "$VERSION"
+            git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }} "$VERSION"
+            gh release create "$VERSION" "$JAR" --generate-notes --title "Release $VERSION" --fail-on-no-commits
