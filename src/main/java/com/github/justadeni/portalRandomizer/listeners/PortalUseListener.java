@@ -7,10 +7,9 @@ import com.github.justadeni.portalRandomizer.location.EmptyCubeFinder;
 import com.github.justadeni.portalRandomizer.location.PortalFinder;
 import com.github.justadeni.portalRandomizer.location.Result;
 import com.github.justadeni.portalRandomizer.util.LocationUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import io.papermc.paper.entity.TeleportFlag;
+import org.bukkit.*;
+import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -69,7 +68,11 @@ public class PortalUseListener implements Listener {
 
             if (attempt instanceof Result.Success success) {
                 PlayerDamageListener.add(player);
-                player.teleportAsync(success.location().add(0.5,0,0.5)).thenRunAsync(() -> PlayerDamageListener.remove(player));
+                Orientable blockData = ((Orientable) success.location().getBlock().getBlockData());
+                float yaw = blockData.getAxis() == Axis.X ? 0 : 90f;
+                success.location().setYaw(yaw);
+                success.location().add(0.5,0,0.5);
+                player.teleportAsync(success.location()).thenRunAsync(() -> PlayerDamageListener.remove(player));
             } else {
                 Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> event.getFrom().getBlock().breakNaturally());
             }
