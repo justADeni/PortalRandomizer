@@ -1,6 +1,6 @@
 package com.github.justadeni.portalRandomizer.listeners;
 
-import com.github.justadeni.portalRandomizer.PortalRandomizer;
+import com.github.justadeni.portalRandomizer.PortalsUncertaintyPrinciple;
 import com.github.justadeni.portalRandomizer.crypto.Feistel24Bit;
 import com.github.justadeni.portalRandomizer.generation.PortalFrameBuilder;
 import com.github.justadeni.portalRandomizer.location.EmptyCubeFinder;
@@ -73,13 +73,13 @@ public class PortalUseListener implements Listener {
                 success.location().add(0.5,0,0.5);
                 player.teleportAsync(success.location()).thenRunAsync(() -> PlayerDamageListener.remove(player));
             } else {
-                Bukkit.getScheduler().runTask(PortalRandomizer.getInstance(), () -> event.getFrom().getBlock().breakNaturally());
+                Bukkit.getScheduler().runTask(PortalsUncertaintyPrinciple.getInstance(), () -> event.getFrom().getBlock().breakNaturally());
             }
         });
     }
 
     private final static Feistel24Bit feistel24Bit = new Feistel24Bit(
-            PortalRandomizer.getInstance().getConfig().getIntegerList("keys")
+            PortalsUncertaintyPrinciple.getInstance().getConfig().getIntegerList("keys")
                     .stream().mapToInt(i->i).toArray());
     private final static EmptyCubeFinder cubeFinder = new EmptyCubeFinder(5);
     private final static PortalFinder portalFinder = new PortalFinder();

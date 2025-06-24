@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public final class PortalRandomizer extends JavaPlugin {
+public final class PortalsUncertaintyPrinciple extends JavaPlugin {
 
     private static JavaPlugin plugin;
 

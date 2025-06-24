@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.justadeni</groupId>
-    <artifactId>portalrandomizer</artifactId>
-    <version>0.3.9</version>
+    <artifactId>PortalsUncertaintyPrinciple</artifactId>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
 
-    <name>PortalRandomizer</name>
+    <name>PortalsUncertaintyPrinciple</name>
 
     <properties>
         <java.version>21</java.version>

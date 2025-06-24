@@ -1,6 +1,6 @@
 name: ${project.name}
 version: ${project.version}
-main: com.github.justadeni.portalRandomizer.PortalRandomizer
+main: com.github.justadeni.portalRandomizer.PortalsUncertaintyPrinciple
 api-version: '1.21'
 authors: [ justADeni ]
 description: Randomizes Nether portal destination
