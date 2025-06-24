@@ -1,17 +1,31 @@
-name: Build and Release JAR
+name: Auto Tag, Build, and Release
 
 on:
   push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - main
 
 jobs:
-  build:
+  all:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Set Environment Variables
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          NAME=$(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "NAME=$NAME" >> $GITHUB_ENV
+
+      - name: Create Tag
+        run: |
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git tag -a "${{ env.VERSION }}" -m "Release ${{ env.VERSION }}"
+            git push origin "${{ env.VERSION }}"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -22,19 +36,11 @@ jobs:
       - name: Build with Maven
         run: mvn -B package
 
-      - name: Get version and artifact name
-        id: vars
-        run: |
-          NAME=$(mvn help:evaluate -Dexpression=project.name -q -DforceStdout)
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "JAR_NAME=${NAME}-${VERSION}.jar" >> $GITHUB_ENV
-          echo "tag_name=v${VERSION}" >> $GITHUB_ENV
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Release
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ env.tag_name }}
-          name: Release ${{ env.tag_name }}
-          files: target/${{ env.JAR_NAME }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "target/${{ env.NAME }}-${{ env.VERSION }}.jar"
+          artifactErrorsFailBuild: true
+          generateReleaseNotes: true
+          makeLatest: true
+          tag: "${{ env.VERSION }}"
