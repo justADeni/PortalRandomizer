@@ -1,6 +1,5 @@
 package com.github.justadeni.portalRandomizer;
 
-import com.github.justadeni.portalRandomizer.listeners.PlayerDamageListener;
 import com.github.justadeni.portalRandomizer.listeners.PortalCreateListener;
 import com.github.justadeni.portalRandomizer.listeners.PortalUseListener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,7 +23,6 @@ public final class PortalsUncertaintyPrinciple extends JavaPlugin {
         generateKeys();
         getServer().getPluginManager().registerEvents(new PortalCreateListener(), this);
         getServer().getPluginManager().registerEvents(new PortalUseListener(), this);
-        getServer().getPluginManager().registerEvents(new PlayerDamageListener(), this);
     }
 
     private void generateKeys() {

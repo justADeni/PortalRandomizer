@@ -15,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 public class PortalUseListener implements Listener {
@@ -53,12 +52,8 @@ public class PortalUseListener implements Listener {
             } else { // No existing Nether portal found, need to find a suitable place and make it
                 Result spaceSearchAttempt = cubeFinder.find(searchCenter);
                 if (spaceSearchAttempt instanceof Result.Success success) {
-                    try {
-                        // Wait until the portal is made, only then proceed
-                        PortalFrameBuilder.create(success.location()).get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
+                    // Wait until the portal is made, only then proceed
+                    PortalFrameBuilder.create(success.location()).join();
                     attempt = new Result.Success(success.location());
                 } else {
                     attempt = new Result.Failure();
@@ -66,12 +61,10 @@ public class PortalUseListener implements Listener {
             }
 
             if (attempt instanceof Result.Success success) {
-                PlayerDamageListener.add(player);
                 Orientable blockData = ((Orientable) success.location().getBlock().getBlockData());
-                float yaw = blockData.getAxis() == Axis.X ? 0 : 90f;
-                success.location().setYaw(yaw);
+                success.location().setYaw(blockData.getAxis() == Axis.X ? 0 : 90f);
                 success.location().add(0.5,0,0.5);
-                player.teleportAsync(success.location()).thenRunAsync(() -> PlayerDamageListener.remove(player));
+                player.teleportAsync(success.location());
             } else {
                 Bukkit.getScheduler().runTask(PortalsUncertaintyPrinciple.getInstance(), () -> event.getFrom().getBlock().breakNaturally());
             }
