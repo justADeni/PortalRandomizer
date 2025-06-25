@@ -17,7 +17,7 @@ Portal's Uncertainty Principle disrupts traditional Nether travel by:
 ## ✅ Installation & Usage
 
 1. **Requirements:** Paper server running Java 21 or newer.  **Recommended: Java 24 for optimal performance.**
-2. **Download:** Download the latest version of the plugin from [the latest Release](https://github.com/justADeni/PortalsUncertaintyPrinciple/releases/tag/0.4.0). ⬇️
+2. **Download:** Download the latest version of the plugin from [the latest Release](https://github.com/justADeni/PortalsUncertaintyPrinciple/releases/latest). ⬇️
 3. **Installation:** Place the `.jar` file into your `plugins` folder on your Paper server.
 4. **Restart:** Restart or reload your server to activate the plugin.
 
