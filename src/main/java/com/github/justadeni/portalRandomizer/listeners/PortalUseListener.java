@@ -2,6 +2,8 @@ package com.github.justadeni.portalRandomizer.listeners;
 
 import com.github.justadeni.portalRandomizer.PortalsUncertaintyPrinciple;
 import com.github.justadeni.portalRandomizer.crypto.Feistel24Bit;
+import com.github.justadeni.portalRandomizer.events.NetherPortalPairCreateEvent;
+import com.github.justadeni.portalRandomizer.events.NetherPortalUseEvent;
 import com.github.justadeni.portalRandomizer.generation.PortalFrameBuilder;
 import com.github.justadeni.portalRandomizer.location.EmptyCubeFinder;
 import com.github.justadeni.portalRandomizer.location.PortalFinder;
@@ -45,29 +47,40 @@ public class PortalUseListener implements Listener {
             Location searchCenter = new Location(destination.world, destination.feistel.apply(updatedLocation.blockX()), destination.world.getSeaLevel(), destination.feistel.apply(updatedLocation.blockZ()));
             Result portalSearchAttempt = portalFinder.find(searchCenter);
 
-            Result attempt;
+            Result portalCreateAttempt = new Result.Failure();
             // Found existing Nether portal nearby to destination, using it
             if (portalSearchAttempt instanceof Result.Success) {
-                attempt = portalSearchAttempt;
-            } else { // No existing Nether portal found, need to find a suitable place and make it
+                portalCreateAttempt = portalSearchAttempt;
+            } else {
+                // No existing Nether portal found, need to find a suitable place and make it
                 Result spaceSearchAttempt = cubeFinder.find(searchCenter);
                 if (spaceSearchAttempt instanceof Result.Success success) {
-                    // Wait until the portal is made, only then proceed
-                    PortalFrameBuilder.create(success.location()).join();
-                    attempt = new Result.Success(success.location());
+                    NetherPortalPairCreateEvent pluginPortalEvent = new NetherPortalPairCreateEvent(player, event.getFrom(), LocationUtil.copy(success.location()));
+                    Bukkit.getPluginManager().callEvent(pluginPortalEvent);
+                    if (!pluginPortalEvent.isCancelled()) {
+                        // Wait until the portal is made, only then proceed
+                        PortalFrameBuilder.create(success.location()).join();
+                        portalCreateAttempt = new Result.Success(success.location());
+                    }
                 } else {
-                    attempt = new Result.Failure();
+                    portalCreateAttempt = new Result.Failure();
                 }
             }
 
-            if (attempt instanceof Result.Success success) {
+            if (portalCreateAttempt instanceof Result.Success success) {
                 Orientable blockData = ((Orientable) success.location().getBlock().getBlockData());
                 success.location().setYaw(blockData.getAxis() == Axis.X ? 0 : 90f);
                 success.location().add(0.5,0,0.5);
-                player.teleportAsync(success.location());
-            } else {
-                Bukkit.getScheduler().runTask(PortalsUncertaintyPrinciple.getInstance(), () -> event.getFrom().getBlock().breakNaturally());
+
+                NetherPortalUseEvent pluginPortalEvent = new NetherPortalUseEvent(player, event.getFrom(), LocationUtil.copy(success.location()));
+                Bukkit.getPluginManager().callEvent(pluginPortalEvent);
+                if (!pluginPortalEvent.isCancelled()) {
+                    player.teleportAsync(success.location());
+                    return;
+                }
             }
+
+            Bukkit.getScheduler().runTask(PortalsUncertaintyPrinciple.getInstance(), () -> event.getFrom().getBlock().breakNaturally());
         });
     }
 

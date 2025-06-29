@@ -29,6 +29,69 @@ If you encounter any bugs or have suggestions, please open an issue on [Github I
 * Server logs (if applicable).
 * Your server version and Java version. 🐞
 
+## 🔧 For Developers
+
+### Import using Maven
+
+* Replace `Tag` with the newest version
+
+```xml
+<repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+</repository>
+```
+```xml
+<dependency>
+    <groupId>com.github.justADeni</groupId>
+    <artifactId>PortalsUncertaintyPrinciple</artifactId>
+    <version>Tag</version>
+</dependency>
+```
+
+### Import using Gradle
+```groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+```groovy
+dependencies {
+    implementation 'com.github.justADeni:PortalsUncertaintyPrinciple:Tag'
+}
+```
+
+## 🚀 Plugin Events
+
+* Keep in mind they're asynchronous.
+* Both can be cancelled.
+* Both have following getters: `getOriginLocation()`, `getDestinationLocation()`, `getPlayer()`.
+
+```java
+/**
+ * Called when Player attempts to use Nether portal.
+ * <p>
+ * This event is {@code asynchronous} and should be used with caution.
+ * Do not interact with Bukkit API methods that are not thread-safe unless switching to the main thread.
+ */
+public class NetherPortalUseEvent extends Event implements Cancellable {
+```
+
+```java
+/**
+ * Called when Player attempts to use Nether portal that doesn't
+ * have a portal on the other end _and_ it's possible to be created.
+ * <p>
+ * This event is {@code asynchronous} and should be used with caution.
+ * Do not interact with Bukkit API methods that are not thread-safe unless switching to the main thread.
+ */
+public class NetherPortalPairCreateEvent extends Event implements Cancellable {
+```
+
 ---
 
 **Disclaimer:** This plugin alters fundamental game mechanics. Use at your own risk!  Back up your world before installing any new plugins. 🙏
